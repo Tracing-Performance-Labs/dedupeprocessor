@@ -27,11 +27,11 @@ func createTracesProcessor(
 
 	var codec *dedupe.Codec
 
-	switch oCfg.tableType {
+	switch oCfg.TableType {
 	case REDIS_TABLE:
 		codec = dedupe.NewCodec(dedupe.WithRedisTable())
 	default:
-		return nil, errors.New("invalid table type: " + string(oCfg.tableType))
+		return nil, errors.New("invalid table type: " + string(oCfg.TableType))
 	}
 
 	return newTracesProcessor(
