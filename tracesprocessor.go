@@ -49,11 +49,12 @@ func (tp *traceProcessor) processTraces(ctx context.Context, td ptrace.Traces) (
 
 				for _, value := range attrs.All() {
 					// TODO: We cannot replace the keys. We might need to delete the key/value pair and a new one.
+					// TODO: Consider using a new goroutine for encoding each attribute.
 
-					// Deduplicate the value
 					if value.Type() == pcommon.ValueTypeStr {
 						slog.Info("deduplicating value", "value", value.Str())
 						newValue := pcommon.NewValueStr(tp.codec.Encode(value.Str()))
+						// TODO: Consider using MoveTo instead of CopyTo.
 						newValue.CopyTo(value)
 					}
 				}
