@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/Tracing-Performance-Labs/go-dedupe"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/ptrace"
@@ -12,16 +13,17 @@ import (
 )
 
 type traceProcessor struct {
-	// TODO: Put Codec dependency here.
+	codec *dedupe.Codec
 }
 
 func newTracesProcessor(
+	codec *dedupe.Codec,
 	ctx context.Context,
 	set processor.Settings,
 	cfg *Config,
 	nextConsumer consumer.Traces,
 ) (processor.Traces, error) {
-	tp := &traceProcessor{}
+	tp := &traceProcessor{codec: codec}
 	return processorhelper.NewTraces(
 		ctx,
 		set,
@@ -45,13 +47,14 @@ func (tp *traceProcessor) processTraces(ctx context.Context, td ptrace.Traces) (
 				// Process the span attributes
 				attrs := span.Attributes()
 
-				for key, value := range attrs.All() {
-					// Deduplicate the key
-					slog.Info("deduplicating key", "key", key)
+				for _, value := range attrs.All() {
+					// TODO: We cannot replace the keys. We might need to delete the key/value pair and a new one.
 
 					// Deduplicate the value
 					if value.Type() == pcommon.ValueTypeStr {
 						slog.Info("deduplicating value", "value", value.Str())
+						newValue := pcommon.NewValueStr(tp.codec.Encode(value.Str()))
+						newValue.CopyTo(value)
 					}
 				}
 
