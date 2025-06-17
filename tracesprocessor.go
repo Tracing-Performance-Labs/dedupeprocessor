@@ -2,8 +2,6 @@ package dedupeprocessor
 
 import (
 	"context"
-	"log/slog"
-
 	"github.com/Tracing-Performance-Labs/go-dedupe"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -41,6 +39,9 @@ func (tp *traceProcessor) processTraces(ctx context.Context, td ptrace.Traces) (
 		for j := 0; j < ilss.Len(); j++ {
 			ils := ilss.At(j)
 			spans := ils.Spans()
+
+			// TODO: Initialize a WaitGroup with the size of spans.
+
 			for k := 0; k < spans.Len(); k++ {
 				span := spans.At(k)
 
@@ -52,7 +53,6 @@ func (tp *traceProcessor) processTraces(ctx context.Context, td ptrace.Traces) (
 					// TODO: Consider using a new goroutine for encoding each attribute.
 
 					if value.Type() == pcommon.ValueTypeStr {
-						slog.Info("deduplicating value", "value", value.Str())
 						newValue := pcommon.NewValueStr(tp.codec.Encode(value.Str()))
 						// TODO: Consider using MoveTo instead of CopyTo.
 						newValue.CopyTo(value)

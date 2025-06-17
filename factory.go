@@ -2,7 +2,6 @@ package dedupeprocessor
 
 import (
 	"context"
-	"errors"
 
 	"github.com/Tracing-Performance-Labs/go-dedupe"
 	"go.opentelemetry.io/collector/component"
@@ -24,20 +23,29 @@ func createTracesProcessor(
 	nextConsumer consumer.Traces,
 ) (processor.Traces, error) {
 	oCfg := cfg.(*Config)
-
-	var codec *dedupe.Codec
-
-	switch oCfg.TableType {
-	case REDIS_TABLE:
-		codec = dedupe.NewCodec(dedupe.WithRedisTable())
-	default:
-		return nil, errors.New("invalid table type: " + string(oCfg.TableType))
-	}
-
+	codec := dedupe.NewCodec(withTableType(oCfg), withReprType(oCfg))
 	return newTracesProcessor(
 		codec,
 		ctx,
 		set,
 		cfg.(*Config),
 		nextConsumer)
+}
+
+func withTableType(oCfg *Config) dedupe.CodecOption {
+	switch oCfg.TableType {
+	case REDIS_TABLE:
+		return dedupe.WithRedisTable()
+	default:
+		return nil
+	}
+}
+
+func withReprType(oCfg *Config) dedupe.CodecOption {
+	switch oCfg.ReprType {
+	case MURMUR_REPR:
+		return dedupe.WithMurmurRepr()
+	default:
+		return dedupe.WithDefaultObjectRepr()
+	}
 }
