@@ -17,7 +17,8 @@ type Config struct {
 }
 
 const (
-	REDIS_TABLE TableType = "redis"
+	REDIS_TABLE  TableType = "redis"
+	MEMORY_TABLE           = "memory"
 )
 
 const (
@@ -26,13 +27,13 @@ const (
 )
 
 var (
-	validTables = []TableType{REDIS_TABLE}
+	validTables = []TableType{REDIS_TABLE, MEMORY_TABLE}
 	validReprs  = []ReprType{DEFAULT_REPR, MURMUR_REPR}
 )
 
 func createDefaultConfig() component.Config {
 	return &Config{
-		TableType: REDIS_TABLE,
+		TableType: MEMORY_TABLE,
 		ReprType:  DEFAULT_REPR,
 	}
 }

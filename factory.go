@@ -9,9 +9,11 @@ import (
 	"go.opentelemetry.io/collector/processor"
 )
 
+var Type = component.MustNewType("dedupeprocessor")
+
 func NewFactory() processor.Factory {
 	return processor.NewFactory(
-		component.MustNewType("dedupeprocessor"),
+		Type,
 		createDefaultConfig,
 		processor.WithTraces(createTracesProcessor, component.StabilityLevelAlpha))
 }
@@ -36,6 +38,8 @@ func withTableType(oCfg *Config) dedupe.CodecOption {
 	switch oCfg.TableType {
 	case REDIS_TABLE:
 		return dedupe.WithRedisTable()
+	case MEMORY_TABLE:
+		return dedupe.WithMemoryTable()
 	default:
 		return nil
 	}
