@@ -115,24 +115,28 @@ func BenchmarkTracesProcessor_ForDifferentSpanQuantities(b *testing.B) {
 
 	// TODO: Configure with Redis.
 
-	factory := NewFactory()
-	cfg := factory.CreateDefaultConfig()
+	withRedis(b, func() {
+		factory := NewFactory()
+		cfg := factory.CreateDefaultConfig()
+		oCfg := cfg.(*Config)
+		oCfg.TableType = REDIS_TABLE
 
-	tp, err := factory.CreateTraces(context.Background(), processortest.NewNopSettings(Type), cfg, consumertest.NewNop())
-	if err != nil {
-		b.Fatalf("Failed to create traces processor: %v", err)
-	}
+		tp, err := factory.CreateTraces(context.Background(), processortest.NewNopSettings(Type), cfg, consumertest.NewNop())
+		if err != nil {
+			b.Fatalf("Failed to create traces processor: %v", err)
+		}
 
-	for _, tt := range testCases {
-		td := generateTraceData(tt.serviceName, tt.inputAttributes, tt.nSpans)
+		for _, tt := range testCases {
+			td := generateTraceData(tt.serviceName, tt.inputAttributes, tt.nSpans)
 
-		b.Run(tt.name, func(b *testing.B) {
-			for b.Loop() {
-				err = tp.ConsumeTraces(context.Background(), td)
-				if err != nil {
-					b.Fatalf("Failed to consume traces: %v", err)
+			b.Run(tt.name, func(b *testing.B) {
+				for b.Loop() {
+					err = tp.ConsumeTraces(context.Background(), td)
+					if err != nil {
+						b.Fatalf("Failed to consume traces: %v", err)
+					}
 				}
-			}
-		})
-	}
+			})
+		}
+	})
 }
