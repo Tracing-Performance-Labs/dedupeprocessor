@@ -3,7 +3,7 @@ module github.com/Tracing-Performance-Labs/dedupeprocessor
 go 1.24.4
 
 require (
-	github.com/Tracing-Performance-Labs/go-dedupe v0.0.6
+	github.com/Tracing-Performance-Labs/go-dedupe v0.0.7
 	github.com/testcontainers/testcontainers-go v0.37.0
 	go.opentelemetry.io/collector/component v1.34.0
 	go.opentelemetry.io/collector/consumer v1.34.0
